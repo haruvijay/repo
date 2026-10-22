@@ -9,6 +9,18 @@
   --border-color: #2d4a4f;
   --radius: 8px;
 }
+#results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f7fb;
+}
 *{
   box-sizing:border-box;
   margin:0;

@@ -8,6 +8,41 @@
   --text-muted: #9ca3af;
   --border-color: #2d4a4f;
   --radius: 8px;
+
+#results-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.result-card {
+  padding: 20px;
+  border-radius: 16px;
+  background: white;
+}
+
+.result-icon {
+  font-size: 36px;
+}
+
+.result-tag {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: #e8eaff;
+}
+#results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f7fb;
 }
 *{
   box-sizing:border-box;

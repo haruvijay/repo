@@ -8,3 +8,4 @@ SnapGrid is a responsive image search web application designed to help users qui
 ## Design Decisions
 1. **Sticky Header:** Positioned the header as sticky so users do not need to scroll back to the top to change their search query after browsing long result pages.
 2. **Category Suggestions:** Integrated clickable tag chips directly under the header to lower friction for first-time visitors looking to explore popular visual topics instantly.
+   This project is developed using HTML, CSS, and Javascript.

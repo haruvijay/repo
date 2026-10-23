@@ -7,95 +7,129 @@ const categoryButtons = document.querySelectorAll(".category");
 
 const inspiration = {
   nature: {
-    emoji: "🌿",
     title: "Nature Escape",
-    description: "Explore greenery, peaceful forests, and the beauty of the natural world."
+    description: "Explore greenery, peaceful forests, and the beauty of nature."
   },
   architecture: {
-    emoji: "🏛️",
     title: "Architecture",
-    description: "Discover inspiring buildings, creative spaces, and remarkable structures."
+    description: "Discover inspiring buildings and creative spaces."
   },
   art: {
-    emoji: "🎨",
     title: "Creative Art",
-    description: "Find colour, imagination, illustration, and ideas for your next creation."
+    description: "Find colour, imagination, illustrations, and creative ideas."
   },
   travel: {
-    emoji: "✈️",
     title: "Travel Dreams",
-    description: "Explore new destinations, memorable journeys, and places to discover."
+    description: "Explore new destinations and memorable journeys."
   },
   ocean: {
-    emoji: "🌊",
-    title: "Ocean Views",
-    description: "Dive into blue waters, beautiful coastlines, and peaceful sea views."
-  },
-  space: {
-    emoji: "🚀",
-    title: "Space & Stars",
-    description: "Explore galaxies, planets, stars, and the wonders of the universe."
+    title: "Ocean Wonders",
+    description: "Discover beautiful oceans, beaches, and marine life."
   }
 };
 
-function searchInspiration(query) {
-  const term = query.trim().toLowerCase();
+function showStatus(message) {
+  if (statusMessage) {
+    statusMessage.textContent = message;
+  }
+}
 
+function clearResults() {
   resultsContainer.replaceChildren();
+}
 
-  if (!term) {
-    statusMessage.textContent = "Please enter a search term or choose a category.";
+function renderResults(photos, query) {
+  if (!photos.length) {
+    showStatus("No images found. Try another search.");
     return;
   }
 
-  const matches = Object.entries(inspiration).filter(([key, item]) =>
-    key.includes(term) ||
-    item.title.toLowerCase().includes(term) ||
-    item.description.toLowerCase().includes(term)
-  );
+  const fragment = document.createDocumentFragment();
 
-  if (matches.length === 0) {
-    statusMessage.textContent =
-      `No exact matches for "${term}". Try nature, art, travel, ocean, or space.`;
-    return;
-  }
-
-  statusMessage.textContent =
-    `Found ${matches.length} inspiration ${matches.length === 1 ? "card" : "cards"}.`;
-
-  matches.forEach(([key, item]) => {
+  photos.forEach((photo) => {
     const card = document.createElement("article");
     card.className = "result-card";
 
-    const icon = document.createElement("div");
-    icon.className = "result-icon";
-    icon.setAttribute("aria-hidden", "true");
-    icon.textContent = item.emoji;
+    const image = document.createElement("img");
+    image.src = photo.urls.regular;
+    image.alt = photo.alt || `Image of ${query}`;
+    image.loading = "lazy";
 
-    const heading = document.createElement("h3");
-    heading.textContent = item.title;
+    const caption = document.createElement("p");
+    caption.textContent = photo.alt || `Inspiration for ${query}`;
 
-    const description = document.createElement("p");
-    description.textContent = item.description;
+    const categoryButton = document.createElement("button");
+    categoryButton.type = "button";
+    categoryButton.className = "category";
+    categoryButton.textContent = query;
+    categoryButton.setAttribute("aria-label", `Search for ${query}`);
 
-    const tag = document.createElement("span");
-    tag.className = "result-tag";
-    tag.textContent = key;
+    categoryButton.addEventListener("click", () => {
+      searchInput.value = query;
+      searchImages(query);
+    });
 
-    card.append(icon, heading, description, tag);
-    resultsContainer.appendChild(card);
+    card.append(image, caption, categoryButton);
+    fragment.appendChild(card);
+  });
+
+  resultsContainer.appendChild(fragment);
+  showStatus(`Found ${photos.length} images for "${query}".`);
+}
+
+async function searchImages(searchTerm) {
+  const query = (searchTerm || searchInput.value).trim();
+
+  if (!query) {
+    return;
+  }
+
+  clearResults();
+  showStatus("Searching for images...");
+
+  if (searchButton) {
+    searchButton.disabled = true;
+  }
+
+  try {
+    const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=12`;
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: "Client-ID YOUR_UNSPLASH_ACCESS_KEY"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    renderResults(data.results || [], query);
+  } catch (error) {
+    console.error("Image search error:", error);
+    showStatus("Unable to load images. Check your API key and internet connection.");
+  } finally {
+    if (searchButton) {
+      searchButton.disabled = false;
+    }
+  }
+}
+
+if (searchForm) {
+  searchForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    searchImages();
   });
 }
 
-searchForm.addEventListener("submit", function (event) {
-  event.preventDefault();
-  searchInspiration(searchInput.value);
-});
+categoryButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const category = button.dataset.category;
 
-categoryButtons.forEach(function (button) {
-  button.addEventListener("click", function () {
-    const query = button.dataset.query;
-    searchInput.value = query;
-    searchInspiration(query);
+    if (category && inspiration[category]) {
+      searchInput.value = category;
+      searchImages(category);
+    }
   });
 });
